@@ -1,0 +1,21 @@
+the CLua entry is used to add scripting to your items in the form of callback functions when a player attempts to purchase an item.
+
+If you are experienced with lua, this will be very easy to graps.
+
+VSHARE is a temporary table created when a player attempts to buy an item. The values assigned to VSHARE are as follows:
+ply : this is the player that has triggered the buy function
+self : this is the vending machine entity
+time : this is the time at which the function was executed
+ent : this is the item that will be spawned (will be a nil value if spawning the item is not possible)
+item : this is the item table used to spawn the item, includes price, name, etc.
+nosound : you have the option to set this in your callback function, setting it to true will disable the vending machine from playing a sound
+
+access VSHARE as if it were a global table, using VSHARE.<var>
+
+VSHARE is cleared after the function is called.
+
+returning false from your callback will disable the default behavior (such as spawning an entity)
+and allows you to write your own conditions.
+
+An example of what this can be used for is for example, giving players the ability to purchase perks, interact with other
+addons, buy ranks with in-game money, disallow players from buying items if they are not a certain rank, etc.
