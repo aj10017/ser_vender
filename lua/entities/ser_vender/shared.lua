@@ -98,7 +98,7 @@ if CLIENT then
 			cp = cp * 50
 			cp.y = cp.y * - 1
 		end
-		//button generation
+		--button generation
 		if self.menu == 0 then
 			if LocalPlayer():IsSuperAdmin() then
 				sgui.AddButton("-Configure-","vf_medium",buttons,100,300,400,70,15,Color(255,0,0,200),Color(100,100,100,200),function(v) self:OpenConfiguration() end)
@@ -145,6 +145,7 @@ if CLIENT then
 					c.b = self.Categories[self.catsel].CatColor.b
 					c.a = self.Categories[self.catsel].CatColor.a
 					c.a = c.a/2
+					if v.col == nil then v.col = c end
 					draw.RoundedBox(0,100,300+(k*120),1000,70,v.col or c)
 					c.a = c.a/2
 					draw.RoundedBox(0,100,375+(k*120),1200,35,v.col or c)
@@ -286,6 +287,7 @@ if CLIENT then
 					self:CreateValueEditor(tmp,0.025,0.4,i,v,"Desc")
 					self:CreateValueEditor(tmp,0.025,0.55,i,v,"Price",true)
 					self:CreateValueEditor(tmp,0.025,0.7,i,v,"CLua",false)
+					self:CreateValueEditor(tmp,0.5,0.1,i,v,"col",false,true)
 					tmp.up = vgui.Create("DButton",tmp)
 						tmp.up:SetPos(tmp.tw*0.85,tmp.tw*0.01)
 						tmp.up:SetSize(tmp.tw*0.05,tmp.th*0.2)
@@ -345,12 +347,17 @@ if CLIENT then
 				tmp.c:SetPalette(false)
 				tmp.c:SetAlphaBar(true)
 				tmp.c:SetWangs(true)
-				tmp.c:SetColor(tbl[i])
+				if tbl[i]~=nil then
+					tmp.c:SetColor(Color(tbl[i].r,tbl[i].g,tbl[i].b,tbl[i].a))
+				else
+					tmp.c:SetColor(Color(55,55,55,55))
+				end
 				function tmp:OnClose()
 					tbl[i]=tmp.c:GetColor()
 				end
 			end
-			function scr:CreateValueEditor(pan,x,y,i,v,vn,n)
+			function scr:CreateValueEditor(pan,x,y,i,v,vn,n,c)
+				if c == nil then c = false end
 				local tmp = pan
 				tmp.n = vgui.Create("DLabel",tmp)
 					if n ~= nil and n == false then
@@ -362,55 +369,59 @@ if CLIENT then
 					tmp.n:SizeToContents()
 					tmp.n:SetMouseInputEnabled(true)
 					tmp.n.DoClick = function()
-						local inp = vgui.Create("DFrame")
-						inp:SetTitle("Set "..vn..":")
-						if n ~= nil and n == false then
-							inp:SetSize(w/2,h/2)
-						else
-							inp:SetSize(w/3,h/14)
-						end
-						inp:Center()
-						inp:SetDraggable(false)
-						inp:SetDeleteOnClose(true)
-						inp:MakePopup()
-						local ib = vgui.Create("DTextEntry",inp)
-						ib:Dock(FILL)
-						ib:SetText(v[vn])
-						if n ~= nil and n == false then
-							ib:SetMultiline(true)
-							ib:SetTabbingDisabled(true)
-							inp.OnClose = function()
-								if ib:GetText()~=nil then
-									if n then
-										v[vn] = tonumber(ib:GetText())
+						if c == false then
+							local inp = vgui.Create("DFrame")
+							inp:SetTitle("Set "..vn..":")
+							if n ~= nil and n == false then
+								inp:SetSize(w/2,h/2)
+							else
+								inp:SetSize(w/3,h/14)
+							end
+							inp:Center()
+							inp:SetDraggable(false)
+							inp:SetDeleteOnClose(true)
+							inp:MakePopup()
+							local ib = vgui.Create("DTextEntry",inp)
+							ib:Dock(FILL)
+							ib:SetText(v[vn])
+							if n ~= nil and n == false then
+								ib:SetMultiline(true)
+								ib:SetTabbingDisabled(true)
+								inp.OnClose = function()
+									if ib:GetText()~=nil then
+										if n then
+											v[vn] = tonumber(ib:GetText())
+										else
+											v[vn] = ib:GetText()
+										end
+									end
+									if i ~= -1 then
+										self:LoadItems(i)
 									else
-										v[vn] = ib:GetText()
+										self:Clear()
+										self:LoadSettings()
 									end
 								end
-								if i ~= -1 then
-									self:LoadItems(i)
-								else
-									self:Clear()
-									self:LoadSettings()
+							else
+								ib.OnEnter = function()
+									if ib:GetText()~=nil then
+										if n then
+											v[vn] = tonumber(ib:GetText())
+										else
+											v[vn] = ib:GetText()
+										end
+									end
+									if i ~= -1 then
+										self:LoadItems(i)
+									else
+										self:Clear()
+										self:LoadSettings()
+									end
+									inp:Close()
 								end
 							end
 						else
-							ib.OnEnter = function()
-								if ib:GetText()~=nil then
-									if n then
-										v[vn] = tonumber(ib:GetText())
-									else
-										v[vn] = ib:GetText()
-									end
-								end
-								if i ~= -1 then
-									self:LoadItems(i)
-								else
-									self:Clear()
-									self:LoadSettings()
-								end
-								inp:Close()
-							end
+							self:OpenModColorPicker(v,vn)
 						end
 					end
 			end

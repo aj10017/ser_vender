@@ -1,4 +1,4 @@
-hook.Add("InitPostEntity","vend_spawner",function()
+local spawn_venders = function()
 	if vend~=nil then
 		vend.load()
 		print("spawning..")
@@ -13,7 +13,11 @@ hook.Add("InitPostEntity","vend_spawner",function()
 			tmp.itemList = v.itemList
 			tmp.Categories = v.Categories
 			tmp:UpdateClientData()
-
 		end
 	end
+end
+
+concommand.Add("vendr_respawn",function() spawn_venders() end)
+hook.Add("InitPostEntity","vend_spawner",function()
+	spawn_venders()
 end)
